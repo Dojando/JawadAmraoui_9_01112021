@@ -1,6 +1,7 @@
 import VerticalLayout from './VerticalLayout.js'
 import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
+import { formatDate} from "../app/format.js"
 
 import Actions from './Actions.js'
 
@@ -47,6 +48,15 @@ export default ({ data: bills, loading, error }) => {
   } else if (error) {
     return ErrorPage(error)
   }
+  
+  // bills.forEach(function(bill) {
+  //   bill.date = formatDate(bill.date);
+  //   console.log(bill.date)
+  // })
+  bills.sort(function(a, b) {
+    return new Date(b.date) - new Date (a.date);
+  });
+
   
   return (`
     <div class='layout'>
