@@ -17,17 +17,25 @@ export default class NewBill {
   }
   handleChangeFile = e => {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    console.log(file);
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
-    this.firestore
-      .storage
-      .ref(`justificatifs/${fileName}`)
-      .put(file)
-      .then(snapshot => snapshot.ref.getDownloadURL())
-      .then(url => {
-        this.fileUrl = url
-        this.fileName = fileName
-      })
+    const nameSplit = fileName.split(".");
+    const fileType = nameSplit[nameSplit.length - 1];
+    if ((fileType === "jpg") || (fileType === "jpeg") || (fileType === "png")) {
+      this.firestore
+        .storage
+        .ref(`justificatifs/${fileName}`)
+        .put(file)
+        .then(snapshot => snapshot.ref.getDownloadURL())
+        .then(url => {
+          this.fileUrl = url
+          this.fileName = fileName
+        })      
+    } else {
+      this.document.querySelector(`input[data-testid="file"]`).value = "";
+      return alert("Vous ne pouvez ajouter que des images (jpg, jpeg ou png)");
+    }
   }
   handleSubmit = e => {
     e.preventDefault()
