@@ -25,9 +25,9 @@ const rows = (data) => {
 }
 
 export default ({ data: bills, loading, error }) => {
-  
+
   const modal = () => (`
-    <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="modaleFile1" data-testid="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -53,9 +53,11 @@ export default ({ data: bills, loading, error }) => {
   //   bill.date = formatDate(bill.date);
   //   console.log(bill.date)
   // })
-  bills.sort(function(a, b) {
-    return new Date(b.date) - new Date (a.date);
-  });
+  if (bills != undefined) {
+    bills.sort(function(a, b) {
+      return new Date(b.date) - new Date (a.date);
+    }); 
+  }
 
   
   return (`
