@@ -49,10 +49,6 @@ export default ({ data: bills, loading, error }) => {
     return ErrorPage(error)
   }
   
-  // bills.forEach(function(bill) {
-  //   bill.date = formatDate(bill.date);
-  //   console.log(bill.date)
-  // })
   if (bills != undefined) {
     bills.sort(function(a, b) {
       return new Date(b.date) - new Date (a.date);

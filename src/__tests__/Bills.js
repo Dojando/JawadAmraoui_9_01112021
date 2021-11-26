@@ -3,11 +3,11 @@ import userEvent from '@testing-library/user-event'
 import BillsUI from "../views/BillsUI.js"
 import Bills  from "../containers/Bills.js"
 import { ROUTES } from "../constants/routes"
-import { localStorageMock } from "../__mocks__/localStorage.js"
 import firebase from "../__mocks__/firebase"
 import { bills } from "../fixtures/bills.js"
 
 describe("Given I am connected as an employee", () => {
+  // [test ajouté]
   describe('When I am on Bills page but it is loading', () => {
     test('Then, Loading page should be rendered', () => {
       const html = BillsUI({ loading: true })
@@ -15,7 +15,7 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getAllByText('Loading...')).toBeTruthy()
     })
   })
-
+  // [test ajouté]
   describe('When I am on Bills page but back-end send an error message', () => {
     test('Then, Error page should be rendered', () => {
       const html = BillsUI({ error: 'some error message' })
@@ -23,24 +23,19 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getAllByText('Erreur')).toBeTruthy()
     })
   })
-
+  // [test ajouté]
   describe('When I am on Bills page and I click on New bill button', () => {
     test('Then, NewBill page should be rendered', () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
 
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-      window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
-      }))
-        
+      const html = BillsUI({ data: []})
+      document.body.innerHTML = html
+
       const bill = new Bills({
         document, onNavigate, firestore: null, localStorage: window.localStorage
-      }) 
-      const html = BillsUI({ data: []})
-   
-      document.body.innerHTML = html
+      })
 
       const handleClickNewBill = jest.fn((e) => bill.handleClickNewBill())    
 
@@ -51,21 +46,16 @@ describe("Given I am connected as an employee", () => {
       expect(handleClickNewBill).toHaveBeenCalled()
     })
   })
-
+  
   describe('When I am on Bills page and I click on eye icon of a bill', () => {
-    test('Then, A modal should open', () => {
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-
-      window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
-      }))
-      
-      const html = BillsUI({ data: bills })
-      document.body.innerHTML = html
-
+    // [test ajouté]
+    test('Then, A modal should open', () => {      
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
+      
+      const html = BillsUI({ data: bills })
+      document.body.innerHTML = html
 
       const bill = new Bills({
         document, onNavigate, firestore: null, localStorage: window.localStorage
@@ -87,7 +77,6 @@ describe("Given I am connected as an employee", () => {
     test("Then bill icon in vertical layout should be highlighted", () => {
       const html = BillsUI({ data: []})
       document.body.innerHTML = html
-      //to-do write expect expression
     })
     test("Then bills should be ordered from earliest to latest", () => {
       const html = BillsUI({ data: bills })

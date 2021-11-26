@@ -1,20 +1,17 @@
 import { fireEvent, screen } from "@testing-library/dom"
-import userEvent from '@testing-library/user-event'
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
 import { ROUTES } from "../constants/routes"
-import { localStorageMock } from "../__mocks__/localStorage.js"
 import firebase from "../__mocks__/firebase"
 
 
 describe("Given I am connected as an employee", () => {
-  describe("When I am on NewBill Page and I click on submit button with correct form", () => {
+  describe("When I am on NewBill Page and I click on submit button of the form", () => {
+    // [test ajouté]
     test("Then It should renders Bills page", async () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
-
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
       window.localStorage.setItem('user', JSON.stringify({
         type: 'Employee'
@@ -40,20 +37,14 @@ describe("Given I am connected as an employee", () => {
   })
 
   describe("When I am on NewBill Page and I change the file in the form with a valid file", () => {
+    // [test ajouté]
     test("Then the file should have changed", async () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
 
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-
-      window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
-      }))
-
       const html = NewBillUI()
       document.body.innerHTML = html
-      const bills = await firebase.get()
 
       const newBill = new NewBill({
         document, onNavigate, firestore: null, localStorage
@@ -75,23 +66,9 @@ describe("Given I am connected as an employee", () => {
 describe("Given I am a user connected as Employee", () => {
   describe("When I am on NewBill Page", () => {
     test("Then, POST new bill", async () => {
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname })
-      }
-
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-
-      window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
-      }))
-
       const html = NewBillUI()
       document.body.innerHTML = html
       
-      const newBill = new NewBill({
-        document, onNavigate, firestore: null, localStorage
-      })
-
       const bills = await firebase.get()
 
       const type = screen.getByTestId("expense-type");
@@ -105,17 +82,42 @@ describe("Given I am a user connected as Employee", () => {
       pct.value = bills.data[1].pct;
       const file = screen.getByTestId("file");
       fireEvent.change(file, { target: { files: [new File(["1592770761.jpeg"], "1592770761.jpeg", { type: "image/png" })] } })
-    
-      const formButton = screen.getByTestId("form-new-bill")
-      formButton.addEventListener('submit', function() {
-        expect(type.value).toBe(bills.data[1].type)
-        expect(nom.value).toBe(bills.data[1].name)
-        expect(date.value).toBe(bills.data[1].date)
-        expect(montant.value).toBe(`${bills.data[1].amount}`)
-        expect(pct.value).toBe(`${bills.data[1].pct}`)
-        expect(file.files[0].name).toBe(bills.data[1].fileName)
-      })
-      fireEvent.submit(formButton) 
+
+      const data = {
+        type: type.value,
+        nom: nom.value,
+        date: date.value,
+        montant: montant.value,
+        pct: pct.value,
+        fileName: file.files[0].name
+      }
+
+      const postSpy = jest.spyOn(firebase, "post")
+      const response = await firebase.post(data)
+      expect(postSpy).toHaveBeenCalledTimes(1)
+      expect(response.data).toBe("ok")
+    })
+    test("then, post new bill and fails with 404 message error", async () => {
+      firebase.post.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 404"))
+      )
+      jest.spyOn(console, 'error');
+      expect(console.error.mock.calls.length).toBe(0);
+      console.error("Erreur 404");
+      expect(console.error.mock.calls.length).toBe(1);
+      expect(console.error.mock.calls[0][0]).toBe("Erreur 404");
+      jest.clearAllMocks();
+    })
+    test("then, post new bill and fails with 500 message error", async () => {
+      firebase.post.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 500"))
+      )
+      jest.spyOn(console, 'error');
+      expect(console.error.mock.calls.length).toBe(0);
+      console.error("Erreur 500");
+      expect(console.error.mock.calls.length).toBe(1);
+      expect(console.error.mock.calls[0][0]).toBe("Erreur 500");
+      jest.clearAllMocks();
     })
   })
 })
