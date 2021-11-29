@@ -58,6 +58,15 @@ export default class {
           })
           .filter(bill => bill.email === userEmail)
           console.log('length', bills.length)
+          if (bills != undefined) {
+            bills.forEach(function(bill){
+              let splitDate = bill.date.split("-");
+              bill.date = `${splitDate[0]} ${splitDate[1]} ${splitDate[2]}`
+            })            
+            bills.sort(function(a, b) {
+              return new Date(b.date) - new Date (a.date);
+            }); 
+          }
         return bills
       })
       .catch(error => error)
